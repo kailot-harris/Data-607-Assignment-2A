@@ -1,0 +1,91 @@
+---
+title: "Assignment2A-KCH-Approach"
+author: "Kailot C. Harris"
+date: "2026/09/09"
+format: html
+editor: visual
+---
+
+```{r assignment-details}
+#| echo: false
+#| message: false
+#| warning: false
+  
+  
+### Assignment Details
+
+#Assignment: SQL and R – Movie Ratings
+#Objective
+#Collect simple movie-rating data, store it in a SQL database, and analyze it in R.
+
+#Implementation Notes:
+#PostgreSQL is the recommended (and supported) relational database for this assignment.  If you are unable to install and configure PostgreSQL in your environment, you may find SQLite easier to use.  Students experienced with relational databases may use any local or cloud-based database for their assignment.
+#NEVER include passwords in your code.  For this assignment, the ability to reproduce your work in my environment is not required, but you need to provide all of the necessary code, include the code used to create and populate tables.
+#Task Description
+
+#Select six recent popular movies (or television episodes or books or songs or ...)
+
+#Ask at least five people to rate each movie they have seen on a 1–5 scale.
+
+#Store the collected ratings in a SQL database of your choice.
+
+#Load the data from SQL into R as a dataframe.
+
+##Implementation Notes
+
+#The assignment is intentionally open-ended; multiple approaches are acceptable.
+
+#You may:
+
+#Query the SQL database directly from R, or
+
+#Export SQL data to a .csv file and load it into R.
+
+#If you use a GUI to create or populate tables, you must also provide the SQL code needed to recreate them.
+
+##Reproducibility
+
+#Your solution should be reproducible assuming the same SQL server and R environment.
+
+#You may remove or mask database passwords.
+
+#Full reproducibility of survey responses is not required.
+
+##Missing Data
+
+#You must demonstrate a reasonable strategy for handling missing ratings, since not all participants will have seen all movies.
+
+#Optional Enhancements
+#You may improve your solution by:
+
+#Using survey software to collect ratings
+
+#Managing database credentials securely
+
+#Designing a normalized database schema
+
+#Exploring whether standardizing ratings is beneficial
+
+#Submission Requirements
+
+#Post all code (SQL, R, Quarto) in a GitHub repository
+
+#Submit the GitHub link
+
+#RPubs publication is not required
+
+#Group work is allowed, but each student must submit individually and list collaborators
+
+#Professional Expectation
+#Treat this as portfolio-quality work suitable for a job interview.
+```
+
+## Approach
+
+This assignment involves data collection via a Movie Survey. The survey was distributed to a group of potential participants, with the goal of capturing movie preferences from at least five people. The scope of this specific Movie Survey was limited to films with the Director role as Paul Thomas Anderson. Nine of Anderson's films were listed with a rating system of 1 (Strongly Dislike) to 5 (Strongly Like). The release year of each movie was included, and that data was sourced from the website 'imdb.com'. Potential participants received the Movie Survey via email or URL link.
+
+Once data collection has completed, the next step is to input the survey results into a SQL database. After inputting the data, analysis will be performed in R, utilizing SQL queries to retrieve the data from the local database.
+
+Anticipated challenges in this assignment include the initial data collection phase and managing missing ratings in the survey. One strategy to increase the survey's reach is to post the survey link in the DATA 607 slack channel or to share the URL with classmates during a meetup. Strategies to manage missing data include calculating the proportion of each rating for responses for each film. In other words, rather than relying on raw counts of 'Strongly Dislike' and other ratings, the percent of responses displaying 'Strongly Dislike' will be calculated, and the same process will be executed for other ratings. Another strategy could be to make "no response" its own category, and display that with the data in histograms. This would help to visualize the relative magnitude of 'no response' vs. 'rated response'.
+
+Possible enhancements to this assignment include secure database credential management, assessing the benefits of normalizing the database schema, and determining the advantage of standardizing ratings. Once findings of this study are determined and verified, recommendations for future improvements and analysis will be outlined.
