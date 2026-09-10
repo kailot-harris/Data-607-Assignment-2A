@@ -151,9 +151,13 @@ First, the dplyr package will be utilized to join existing data frames. The 'rat
 
 ```{r join-tables}
 
-df <- left_join(df_ratings, df_movies, by = "movie_id")
+df <- left_join(df_ratings, 
+                df_movies, 
+                by = "movie_id")
     
-df <- left_join(df, df_respondents, by = "respondent_id")
+df <- left_join(df, 
+                df_respondents, 
+                by = "respondent_id")
 
 head(df)
 
@@ -162,7 +166,7 @@ head(df)
 
 ## Handling Missing Data
 
-Missing data in this movie survey can be input as NA values, and subsequent functions will omit those data from the calculations. First, a data structure containing all possible combinations of 'respondent_id' and 'movie_id' is generated. This will act as the scaffolding into which other data is input. Any 'respondent_id' - 'movie_id' combination that does not have matching rating data will be left as NA.
+Missing data in this movie survey can be input as NA values, and subsequent functions will omit those data from the calculations. First, a data structure containing all possible combinations of 'respondent_id' and 'movie_id' is generated using DPLYR's 'expand.grid'. This new frame will act as the scaffolding into which other data is input. Any 'respondent_id' - 'movie_id' combination that does not have matching rating data will be left as NA.
 
 ```{r missing-data}
 
@@ -182,12 +186,29 @@ df_2 <- respondent_movie_combinations |>
 head(df_2)
 ```
 
-Next, the magnitude of missing data is quickly calculated and displayed as output..
+Next, the magnitude of missing data is quickly calculated and displayed as output along with the number of existing records with complete ratings.
 
 ```{r missing-data-count}
 
 num_missing <- sum(is.na(df_2$rating_id))
-msg <- paste("There are ", num_missing, " missing ratings in this data frame.")
+
+num_entries <- sum(!is.na(df_2$rating_id))
+
+msg <- paste("There are ", num_missing, " missing ratings in this data frame and ", num_entries, " completed ratings in this data frame.")
            
 msg
+```
+
+## Visualization
+
+The facet_wrap function in ggplot is utilized to generate plots of each movie and a rating bar chart.
+
+```{r plot-bar-charts}
+ggplot(df_2, aes(x=rating))+
+  geom_bar() +
+  facet_wrap(~ title) +
+  labs(x="Rating (1 = Strongly Dislike, 5 = Strongly Like)",
+       y="Number of Respondents",
+       title = "Rating Spread of Movies Directed by Paul Thomas Anderson Since 1997") +
+  theme_minimal()
 ```
