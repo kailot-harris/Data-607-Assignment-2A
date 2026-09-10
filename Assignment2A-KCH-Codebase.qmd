@@ -199,11 +199,15 @@ msg <- paste("There are ", num_missing, " missing ratings in this data frame and
 msg
 ```
 
-## Visualization
+## Visualization and Analysis
 
-The facet_wrap function in ggplot is utilized to generate plots of each movie and a rating bar chart.
+The facet_wrap function in ggplot is utilized to generate plots of each movie's ratings as a bar chart in an organized fashion.
 
 ```{r plot-bar-charts}
+#| echo: true
+#| message: false
+#| warning: false
+
 ggplot(df_2, aes(x=rating))+
   geom_bar() +
   facet_wrap(~ title) +
@@ -211,4 +215,66 @@ ggplot(df_2, aes(x=rating))+
        y="Number of Respondents",
        title = "Rating Spread of Movies Directed by Paul Thomas Anderson Since 1997") +
   theme_minimal()
+```
+
+The mean rating for each movie will be calculated with missing data (NA values) removed.
+
+```{r}
+df_2 |>
+  summarize(mean_1 = mean(
+            subset(df_2$rating,
+           df_2$rating>0 & 
+             df_2$movie_id==1), 
+            na.rm = TRUE),
+           # 
+           mean_2 = mean(
+              subset(df_2$rating,
+                     df_2$rating>0 & 
+                       df_2$movie_id==2), 
+              na.rm = TRUE),
+           #
+           mean_3 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==3), 
+             na.rm = TRUE),
+           #
+           mean_4 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==4), 
+             na.rm = TRUE),
+           #
+           mean_5 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==5), 
+             na.rm = TRUE),
+           #
+           mean_6 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==6), 
+             na.rm = TRUE),
+           #
+           mean_7 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==7), 
+             na.rm = TRUE),
+           #
+           mean_8 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==8), 
+             na.rm = TRUE),
+           #
+           mean_9 = mean(
+             subset(df_2$rating,
+                    df_2$rating>0 & 
+                      df_2$movie_id==9), 
+             na.rm = TRUE))
+            
+# There's got to be an easier way to calculate these mean values
+# Need to investigate functions and loops
 ```
