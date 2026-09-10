@@ -127,11 +127,17 @@ Now that the database connection has been established, the import can begin. A m
 ![](images/clipboard-3493479335.png)
 
 ```{r DB-import}
+library(tidyverse)
 
 df_movies <- dbGetQuery(con, "select * from movies;")
 
 df_respondents <- dbGetQuery(con, "select * from respondents;")
 
 df_ratings <- dbGetQuery(con, "select * from ratings;")
+
+dbDisconnect(con)
+
+glimpse(df_ratings)
+
 
 ```

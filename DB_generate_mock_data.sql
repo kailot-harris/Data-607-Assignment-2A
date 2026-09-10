@@ -18,13 +18,13 @@ CREATE TABLE movies (
     title VARCHAR(100) NOT NULL
 );
 
--- No rating row = that person hasn't seen/rated that movie.
+-- No rating row = that respondent hasn't seen/rated that movie.
 -- create ratings table with rating_id as primary key
 CREATE TABLE ratings (
     rating_id SERIAL PRIMARY KEY,
     respondent_id INT NOT NULL REFERENCES respondents(respondent_id),
     movie_id INT NOT NULL REFERENCES movies(movie_id),
-    rating INT CHECK (rating BETWEEN 1 AND 5),
+    rating INT CHECK (rating BETWEEN 1 AND 5), -- only accept an integer between 1 and 5
     UNIQUE (respondent_id, movie_id)
 );
 
@@ -55,14 +55,21 @@ INSERT INTO movies (title) VALUES
 
 -- ---------------------------------------------------------
 -- 4. Mock ratings, deliberately incomplete
---    (not every user rated every movie)
+--    (not every respondent rated every movie)
 -- ---------------------------------------------------------
 -- insert mock respondent data (7 users and 9 movies)
 INSERT INTO ratings (respondent_id, movie_id, rating) VALUES
+-- respondent 1, movie 1, rating 5, etc.
 (1, 1, 5), (1, 2, 4), (1, 3, 3), (1, 4, 5), (1, 5, 4), (1, 6, 3),(1, 7, 5), (1, 8, 4), (1, 9, 3),
+-- respondent 2
 (2, 1, 4), (2, 2, 5), (2, 3, 2), (2, 4, 3), (2, 5, 1), (2, 7, 5), (2, 8, 2), (2, 9, 4),
+-- respondent 3
 (3, 1, 3), (3, 3, 5), (3, 5, 4), (3, 7, 3), (3, 9, 5),
+-- respondent 4
 (4, 2, 4), (4, 4, 3), (4, 6, 5), (4, 8, 4),
+-- respondent 5
 (5, 1, 5), (5, 5, 2), (5, 3, 5), (5, 7, 5), (5, 9, 2),
+-- respondent 6
 (6, 3, 4), (6, 2, 4), (6, 4, 4), (6, 5, 4),
+-- respondent 7
 (7, 2, 3), (7, 4, 4), (7, 6, 3);
