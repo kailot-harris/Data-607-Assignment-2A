@@ -126,6 +126,8 @@ Now that the database connection has been established, the import can begin. A m
 
 ![](images/clipboard-3493479335.png)
 
+The three tables in the database will be imported to data frames using simple SQL commands.
+
 ```{r DB-import}
 library(tidyverse)
 
@@ -135,9 +137,57 @@ df_respondents <- dbGetQuery(con, "select * from respondents;")
 
 df_ratings <- dbGetQuery(con, "select * from ratings;")
 
+##closing the DB conneciton after importing data
 dbDisconnect(con)
-
+## Confirming df_Ratings is of expected dimensions 
 glimpse(df_ratings)
 
 
+```
+
+## Data Tidying
+
+First, the dplyr package will be utilized to join existing data frames. The 'ratings' and 'movies' frames can be joined via the 'movie_id' key. Then the subsequent frame can be joined to 'respondents' via the 'respondent_id' key. The second join does not materially alter the initial frame, as 'respondent_id' is the only attribute in the 'respondents' frame. However, this step can be useful in verification: only allowing ratings with valid 'respondent_id' values pass through the join.
+
+```{r join-tables}
+
+df <- left_join(df_ratings, df_movies, by = "movie_id")
+    
+df <- left_join(df, df_respondents, by = "respondent_id")
+
+head(df)
+
+#?left_join
+```
+
+## Handling Missing Data
+
+Missing data in this movie survey can be input as NA values, and subsequent functions will omit those data from the calculations. First, a data structure containing all possible combinations of 'respondent_id' and 'movie_id' is generated. This will act as the scaffolding into which other data is input. Any 'respondent_id' - 'movie_id' combination that does not have matching rating data will be left as NA.
+
+```{r missing-data}
+
+respondent_movie_combinations <- expand.grid(
+  respondent_id = df_respondents$respondent_id,
+  movie_id = df_movies$movie_id
+)  
+
+df_2 <- respondent_movie_combinations |>
+  left_join(df_ratings, 
+            by = c("respondent_id",
+                   "movie_id")) |>
+  left_join(df_movies, 
+            by="movie_id")
+
+#NA values visible in rating id and rating column
+head(df_2)
+```
+
+Next, the magnitude of missing data is quickly calculated and displayed as output..
+
+```{r missing-data-count}
+
+num_missing <- sum(is.na(df_2$rating_id))
+msg <- paste("There are ", num_missing, " missing ratings in this data frame.")
+           
+msg
 ```
