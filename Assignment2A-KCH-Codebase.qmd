@@ -100,7 +100,38 @@ Possible enhancements to this assignment include secure database credential mana
 
 ## Data Import into R
 
-```{r data-import-step-1}
+Importing data from the local database into R will be guided by this support article from Posit: (<https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server>). Additionally, the help files for RPostgres and the website for RPostgres (<https://rpostgres.r-dbi.org/>) will provide important guidance for data import.
 
+```{r connect-to-DB}
+#| echo: true
+#| message: false
+#| warning: false
+
+#library(DBI)
+library(RPostgres)
+#library(odbc)
+
+#establish connection
+con <- dbConnect(RPostgres::Postgres(),
+                 dbname = 'Second_DB_DATA607', 
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = rstudioapi::askForPassword("DB pw"))
+
+#?RPostgres
+```
+
+Now that the database connection has been established, the import can begin. A mapping of the PostgreSQL database schema is attached as reference, which was generated in pgAdmin 4.
+
+![](images/clipboard-3493479335.png)
+
+```{r DB-import}
+
+df_movies <- dbGetQuery(con, "select * from movies;")
+
+df_respondents <- dbGetQuery(con, "select * from respondents;")
+
+df_ratings <- dbGetQuery(con, "select * from ratings;")
 
 ```
