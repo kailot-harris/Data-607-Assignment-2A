@@ -98,9 +98,110 @@ Anticipated challenges in this assignment include the initial data collection ph
 
 Possible enhancements to this assignment include secure database credential management, assessing the benefits of normalizing the database schema, and determining the advantage of standardizing ratings. Once findings of this study are determined and verified, recommendations for future improvements and analysis will be outlined.
 
+## Synthetic Data Generation
+
+Due to a paucity of survey respondents, ratings data was synthesized. To create a mock data set, SQL code was written to initialize a PostgreSQL database. The code is replicated in the below code chunk. The code will not execute, but is here for demonstration purposes.
+
+```         
+-- DATA 607 - Assignment 2A - SQL Database Input
+
+-- ---------------------------------------------------------
+-- Section 1. Schema
+-- ---------------------------------------------------------
+-- first, clear out existing tables before entering mock data
+DROP TABLE IF EXISTS ratings;
+DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS respondents;
+
+-- create respondent table with respondent_id as primary key
+CREATE TABLE respondents (
+    respondent_id SERIAL PRIMARY KEY
+);
+-- create movies table with primary key of movie_id
+CREATE TABLE movies (
+    movie_id SERIAL PRIMARY KEY,
+    title VARCHAR(100) NOT NULL
+);
+
+-- No rating row = that respondent hasn't seen/rated that movie.
+-- create ratings table with rating_id as primary key
+CREATE TABLE ratings (
+    rating_id SERIAL PRIMARY KEY,
+    respondent_id INT NOT NULL REFERENCES respondents(respondent_id),
+    movie_id INT NOT NULL REFERENCES movies(movie_id),
+    rating INT CHECK (rating BETWEEN 1 AND 5), -- only accept an integer between 1 and 5
+    UNIQUE (respondent_id, movie_id)
+);
+
+-- ---------------------------------------------------------
+-- Section 2. Mock respondents
+-- ---------------------------------------------------------
+-- insert 7 users into respondent table
+INSERT INTO respondents (respondent_id)
+VALUES (DEFAULT), (DEFAULT), (DEFAULT), (DEFAULT), (DEFAULT), (DEFAULT), (DEFAULT);
+
+
+-- ---------------------------------------------------------
+-- Section 3. Movie Titles Insertion 
+-- ---------------------------------------------------------
+-- insert 9 movies into movie table
+INSERT INTO movies (title) VALUES
+('One Battle After Another (2025)'),
+('Licorice Pizza (2021)'),
+('Phantom Thread (2017)'),
+('Inherent Vice (2014)'),
+('The Master (2012)'),
+('There Will Be Blood (2007)'),
+('Punch-Drunk Love (2002)'),
+('Magnolia (1999)'),
+('Boogie Nights (1997)');
+-- data sourced from 'imdb.com'
+
+
+-- ---------------------------------------------------------
+-- Section 4. Mock ratings, deliberately incomplete
+--    (not every respondent rated every movie)
+-- ---------------------------------------------------------
+-- insert mock respondent data (7 users and 9 movies)
+INSERT INTO ratings (respondent_id, movie_id, rating) VALUES
+-- respondent 1, movie 1, rating 5, etc.
+(1, 1, 5), (1, 2, 4), (1, 3, 3), (1, 4, 5), (1, 5, 4), (1, 6, 3),(1, 7, 5), (1, 8, 4), (1, 9, 3),
+-- respondent 2
+(2, 1, 4), (2, 2, 5), (2, 3, 2), (2, 4, 3), (2, 5, 1), (2, 7, 5), (2, 8, 2), (2, 9, 4),
+-- respondent 3
+(3, 1, 3), (3, 3, 5), (3, 5, 4), (3, 7, 3), (3, 9, 5),
+-- respondent 4
+(4, 2, 4), (4, 4, 3), (4, 6, 5), (4, 8, 4),
+-- respondent 5
+(5, 1, 5), (5, 5, 2), (5, 3, 5), (5, 7, 5), (5, 9, 2),
+-- respondent 6
+(6, 3, 4), (6, 2, 4), (6, 4, 4), (6, 5, 4),
+-- respondent 7
+(7, 2, 3), (7, 4, 4), (7, 6, 3);
+```
+
+Additional queries were written to practice pulling and summarizing data before import into R. Portions of this code were replicated below when actually pulling data from the database into R. Lastly, this code chunk will not execute.
+
+```         
+-- DATA 607 - Assignment 2A - SQL Database Querying
+
+-- ---------------------------------------------------------
+-- 1. Select all data from ratings
+-- ---------------------------------------------------------
+select * from ratings;
+
+-- ---------------------------------------------------------
+-- 2. Output summary table listing how many movies each respondent rated
+-- ---------------------------------------------------------
+select respondent_id, count(*) as movies_rated
+	from ratings
+	group by respondent_id
+	order by respondent_id;
+```
+
 ## Data Import into R
 
-Importing data from the local database into R will be guided by this support article from Posit: (<https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server>). Additionally, the help files for RPostgres and the website for RPostgres (<https://rpostgres.r-dbi.org/>) will provide important guidance for data import.
+Importing data from the local database into R will be guided by this support article from Posit: (<https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server>). Additionally, the help files for RPostgres and the website for RPostgres (<https://rpostgres.r-dbi.org/>) will provide important guidance for data import. Originally, the database password verification was achieved via a method in the posit support document above, in which the user is prompted for a password via the dialog box. However, this created issues when rendering the Quarto document to html, and therefore a new approach was needed. The old code has been commented out, and it remains as an artifact. Instead, a method using .Renviron replaces the original method as a preferred method, according to posit documentation (<https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables>).
 
 ```{r connect-to-DB}
 #| echo: true
@@ -116,8 +217,11 @@ con <- dbConnect(RPostgres::Postgres(),
                  dbname = 'Second_DB_DATA607', 
                  host = 'localhost',
                  port = 5432,
-                 user = 'postgres',
-                 password = rstudioapi::askForPassword("DB pw"))
+                 user = Sys.getenv("DATA_607_DB_USER"),
+                 password = Sys.getenv("DATA_607_DB_PW"))
+                 # password = rstudioapi::askForPassword("DB pw"))  
+                 ### old password verification method
+                 
 
 #?RPostgres
 ```
@@ -126,9 +230,14 @@ Now that the database connection has been established, the import can begin. A m
 
 ![](images/clipboard-3493479335.png)
 
-The three tables in the database will be imported to data frames using simple SQL commands.
+The three tables in the database will be imported to data frames using simple SQL commands. This SQL code was replicated from above in the trial queries section.
 
 ```{r DB-import}
+#| echo: TRUE
+#| warning: FALSE
+#| message: FALSE
+
+
 library(tidyverse)
 
 df_movies <- dbGetQuery(con, "select * from movies;")
@@ -194,7 +303,7 @@ num_missing <- sum(is.na(df_2$rating_id))
 
 num_entries <- sum(!is.na(df_2$rating_id))
 
-msg <- paste("There are ", num_missing, " missing ratings in this data frame and ", num_entries, " completed ratings in this data frame.")
+msg <- paste("There are ", num_missing, " missing ratings in this data frame and", num_entries, " completed ratings in this data frame.")
            
 msg
 ```
@@ -217,9 +326,14 @@ ggplot(df_2, aes(x=rating))+
   theme_minimal()
 ```
 
-The mean rating for each movie will be calculated with missing data (NA values) removed.
+The mean rating for each movie is calculated without the missing data. Standard deviations are also calculated for each movie.
 
-```{r}
+```{r brute-force}
+#| echo: false
+#| message: false
+#| warning: false
+
+
 df_2 |>
   summarize(mean_1 = mean(
             subset(df_2$rating,
@@ -276,17 +390,21 @@ df_2 |>
              na.rm = TRUE))
             
 # There must be an easier way to calculate these mean values
+```
+
+Chapter 4 of 'R for Data Science' (<https://r4ds.hadley.nz/workflow-style.html#sec-pipes>) contains example code that uses a piping of filter then group_by then summarize to deliver mean arrival times in the 'nycflights' data. A similar approach was replicated below to compute a summary more elegantly.
+
+```{r elegant-summary}
 
 df_2 |>
-  filter(rating > 0) |>
+  filter(rating > 0) |> #remove null values
   
-  group_by(movie_id) |>
+  group_by(movie_id) |> #create grouping for the summarize to act on
   
-  summarize (mean_rating = mean(rating, na.rm=TRUE),
-             SD_rating = stats::sd(rating, na.rm=TRUE))|>
+  summarize (mean_rating = mean(rating, na.rm=TRUE), #calc mean BY movie_id
+             SD_rating = stats::sd(rating, na.rm=TRUE))|> #calc SD by movie_id
   
-  arrange(desc(mean_rating))
-
+  arrange(desc(mean_rating)) #sort so highest rated at top
 
 ```
 
@@ -307,12 +425,6 @@ df_2 |>
        x = "Rating",
        y = "Title") +
   ylab(NULL)
-#Need a way to remove legend... theme?
-?legend
-?theme
-  
-?ggplot
-
 
 ?geom_density_ridges
 ```
