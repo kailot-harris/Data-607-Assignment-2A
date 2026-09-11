@@ -201,7 +201,7 @@ select respondent_id, count(*) as movies_rated
 
 ## Data Import into R
 
-Importing data from the local database into R will be guided by this support article from Posit: (<https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server>). Additionally, the help files for RPostgres and the website for RPostgres (<https://rpostgres.r-dbi.org/>) will provide important guidance for data import. Originally, the database password verification was achieved via a method in the posit support document above, in which the user is prompted for a password via the dialog box. However, this created issues when rendering the Quarto document to html, and therefore a new approach was needed. The old code has been commented out, and it remains as an artifact. Instead, a method using .Renviron replaces the original method as a preferred method, according to posit documentation (<https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables>).
+Importing data from the local database into R is guided by this support article from Posit: (<https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server>). Additionally, the help files for RPostgres and the website for RPostgres (<https://rpostgres.r-dbi.org/>) provide important guidance for data import. Originally, database password verification was achieved via a method described by the Posit support document above, in which the user is prompted for a password via the dialog box at time of connection. However, this created issues when rendering the Quarto document to html, and therefore a new approach was needed. The old code has been commented out, and it remains as an artifact. Instead, a more secure method using environment variables replaces the original method (<https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables>).
 
 ```{r connect-to-DB}
 #| echo: true
@@ -221,9 +221,6 @@ con <- dbConnect(RPostgres::Postgres(),
                  password = Sys.getenv("DATA_607_DB_PW"))
                  # password = rstudioapi::askForPassword("DB pw"))  
                  ### old password verification method
-                 
-
-#?RPostgres
 ```
 
 Now that the database connection has been established, the import can begin. A mapping of the PostgreSQL database schema is attached as reference, which was generated in pgAdmin 4.
@@ -269,8 +266,6 @@ df <- left_join(df,
                 by = "respondent_id")
 
 head(df)
-
-#?left_join
 ```
 
 ## Handling Missing Data
@@ -388,8 +383,6 @@ df_2 |>
                     df_2$rating>0 & 
                       df_2$movie_id==9), 
              na.rm = TRUE))
-            
-# There must be an easier way to calculate these mean values
 ```
 
 Chapter 4 of 'R for Data Science' (<https://r4ds.hadley.nz/workflow-style.html#sec-pipes>) contains example code that uses a piping of filter then group_by then summarize to deliver mean arrival times in the 'nycflights' data. A similar approach was replicated below to compute a summary more elegantly.
@@ -399,10 +392,10 @@ Chapter 4 of 'R for Data Science' (<https://r4ds.hadley.nz/workflow-style.html#s
 df_2 |>
   filter(rating > 0) |> #remove null values
   
-  group_by(movie_id) |> #create grouping for the summarize to act on
+  group_by(title) |> #create grouping for the summarize to act on
   
-  summarize (mean_rating = mean(rating, na.rm=TRUE), #calc mean BY movie_id
-             SD_rating = stats::sd(rating, na.rm=TRUE))|> #calc SD by movie_id
+  summarize (mean_rating = mean(rating, na.rm=TRUE), #calc mean BY title
+             SD_rating = stats::sd(rating, na.rm=TRUE))|> #calc SD by title
   
   arrange(desc(mean_rating)) #sort so highest rated at top
 
@@ -416,15 +409,24 @@ library(ggridges)
 
 df_2 |>
   filter(rating>0) |> #remove nulls
+  arrange(movie_id) |>
   ggplot(aes(x=rating, 
              y=title, 
              fill=title)) +
-  geom_density_ridges(scale = 1, 
+  geom_density_ridges(scale = 2, 
                       alpha=0.7, show.legend = FALSE) +
-  labs(title="Distribution of Ratings for Movies Directed by\nPaul Thomas Anderson (ranked by mean rating)",
+  labs(title="Distribution of Ratings for Movies \nDirected by Paul Thomas Anderson",
        x = "Rating",
        y = "Title") +
   ylab(NULL)
-
-?geom_density_ridges
 ```
+
+## Findings and Recommendations
+
+The initial survey mechanism for collecting data was unsuccessful, and an alternative method of synthetic data generation was employed. Rating data were generated for 7 mock respondents across 9 films using hard-coded values to retain reproducibility. An approach using quasi-random data generation was considered, but it was not pursued due to resource constraints.
+
+Additional findings include the mean rating and standard deviation of rating for each movie in the data set. The movie with the highest measured average rating was 'Punch-Drunk Love', with a mean of 4.5, while the movie with the lowest measured average rating was 'The Master', with a mean of 3.0. These high average ratings indicate a high overall affinity among mock respondents for these films.
+
+Lastly, certain procedural refinements were made along the way: storing credentials as environment variables, using a piped process to calculate mean ratings, and designing an effective database schema. Each of these practices can be integrated into a standard protocol for similar technical undertakings.
+
+While the movie release year was not an integral piece of information, one recommendation for future work could be to store this data in its own column, allowing for the arrangement of the movies in ascending or descending order by release year. Additionally, one future enhancement for data collection could be to create a connection between the database and the user inputs. This would remove the need for manual data input, which can lead to error. Lastly, standardizing the movie rating data by respondent before aggregating it by film could eliminate or account for certain respondent biases.

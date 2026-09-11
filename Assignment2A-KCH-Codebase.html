@@ -218,7 +218,7 @@ select respondent_id, count(*) as movies_rated
 </section>
 <section id="data-import-into-r" class="level2">
 <h2 class="anchored" data-anchor-id="data-import-into-r">Data Import into R</h2>
-<p>Importing data from the local database into R will be guided by this support article from Posit: (<a href="https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server" class="uri">https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server</a>). Additionally, the help files for RPostgres and the website for RPostgres (<a href="https://rpostgres.r-dbi.org/" class="uri">https://rpostgres.r-dbi.org/</a>) will provide important guidance for data import. Originally, the database password verification was achieved via a method in the posit support document above, in which the user is prompted for a password via the dialog box. However, this created issues when rendering the Quarto document to html, and therefore a new approach was needed. The old code has been commented out, and it remains as an artifact. Instead, a method using .Renviron replaces the original method as a preferred method, according to posit documentation (<a href="https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables" class="uri">https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables</a>).</p>
+<p>Importing data from the local database into R is guided by this support article from Posit: (<a href="https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server" class="uri">https://support.posit.co/hc/en-us/articles/214510788-Setting-up-R-to-connect-to-SQL-Server</a>). Additionally, the help files for RPostgres and the website for RPostgres (<a href="https://rpostgres.r-dbi.org/" class="uri">https://rpostgres.r-dbi.org/</a>) provide important guidance for data import. Originally, database password verification was achieved via a method described by the Posit support document above, in which the user is prompted for a password via the dialog box at time of connection. However, this created issues when rendering the Quarto document to html, and therefore a new approach was needed. The old code has been commented out, and it remains as an artifact. Instead, a more secure method using environment variables replaces the original method (<a href="https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables" class="uri">https://solutions.posit.co/connections/db/best-practices/managing-credentials/#use-environment-variables</a>).</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(DBI)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RPostgres)</span>
@@ -322,11 +322,11 @@ $ rating        &lt;int&gt; 5, 4, 3, 5, 4, 3, 5, 4, 3, 4, 5, 2, 3, 1, 5, 2, 4, 3
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>num_entries <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(df_2<span class="sc">$</span>rating_id))</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>msg <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"There are "</span>, num_missing, <span class="st">" missing ratings in this data frame and "</span>, num_entries, <span class="st">" completed ratings in this data frame."</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>msg <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"There are "</span>, num_missing, <span class="st">" missing ratings in this data frame and"</span>, num_entries, <span class="st">" completed ratings in this data frame."</span>)</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>           </span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>msg</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "There are  25  missing ratings in this data frame and  38  completed ratings in this data frame."</code></pre>
+<pre><code>[1] "There are  25  missing ratings in this data frame and 38  completed ratings in this data frame."</code></pre>
 </div>
 </div>
 </section>
@@ -361,25 +361,25 @@ $ rating        &lt;int&gt; 5, 4, 3, 5, 4, 3, 5, 4, 3, 4, 5, 2, 3, 1, 5, 2, 4, 3
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df_2 <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(rating <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="co">#remove null values</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(movie_id) <span class="sc">|&gt;</span> <span class="co">#create grouping for the summarize to act on</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(title) <span class="sc">|&gt;</span> <span class="co">#create grouping for the summarize to act on</span></span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span> (<span class="at">mean_rating =</span> <span class="fu">mean</span>(rating, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="co">#calc mean BY movie_id</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">SD_rating =</span> stats<span class="sc">::</span><span class="fu">sd</span>(rating, <span class="at">na.rm=</span><span class="cn">TRUE</span>))<span class="sc">|&gt;</span> <span class="co">#calc SD by movie_id</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span> (<span class="at">mean_rating =</span> <span class="fu">mean</span>(rating, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="co">#calc mean BY title</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">SD_rating =</span> stats<span class="sc">::</span><span class="fu">sd</span>(rating, <span class="at">na.rm=</span><span class="cn">TRUE</span>))<span class="sc">|&gt;</span> <span class="co">#calc SD by title</span></span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean_rating)) <span class="co">#sort so highest rated at top</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 3
-  movie_id mean_rating SD_rating
-     &lt;int&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-1        7        4.5      1    
-2        1        4.25     0.957
-3        2        4        0.707
-4        3        3.8      1.30 
-5        4        3.8      0.837
-6        6        3.67     1.15 
-7        9        3.5      1.29 
-8        8        3.33     1.15 
-9        5        3        1.41 </code></pre>
+  title                           mean_rating SD_rating
+  &lt;chr&gt;                                 &lt;dbl&gt;     &lt;dbl&gt;
+1 Punch-Drunk Love (2002)                4.5      1    
+2 One Battle After Another (2025)        4.25     0.957
+3 Licorice Pizza (2021)                  4        0.707
+4 Inherent Vice (2014)                   3.8      0.837
+5 Phantom Thread (2017)                  3.8      1.30 
+6 There Will Be Blood (2007)             3.67     1.15 
+7 Boogie Nights (1997)                   3.5      1.29 
+8 Magnolia (1999)                        3.33     1.15 
+9 The Master (2012)                      3        1.41 </code></pre>
 </div>
 </div>
 <p>The distribution of ratings data is plotted in a ridge plot. Certain difficulties were encountered in the process of generating the figure. First, the legend needed to be removed, as it created visual noise without assisting in distinguishing the plotted series. Removal of the legend was accomplished by setting the ‘show.legend’ boolean to false. Inspiration for this technique was found here: <a href="https://ggplot2-book.org/maps.html#sec-polygonmaps" class="uri">https://ggplot2-book.org/maps.html#sec-polygonmaps</a>. Plotting the data as a ridgeline was inspired from a previous project and this resource: <a href="https://wilkelab.org/ggridges/articles/introduction.html" class="uri">https://wilkelab.org/ggridges/articles/introduction.html</a>.</p>
@@ -390,15 +390,16 @@ $ rating        &lt;int&gt; 5, 4, 3, 5, 4, 3, 5, 4, 3, 4, 5, 2, 3, 1, 5, 2, 4, 3
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_2 <span class="sc">|&gt;</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(rating<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="co">#remove nulls</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>rating, </span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">y=</span>title, </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill=</span>title)) <span class="sc">+</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(<span class="at">scale =</span> <span class="dv">1</span>, </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">alpha=</span><span class="fl">0.7</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Distribution of Ratings for Movies Directed by</span><span class="sc">\n</span><span class="st">Paul Thomas Anderson (ranked by mean rating)"</span>,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Rating"</span>,</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Title"</span>) <span class="sc">+</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(movie_id) <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>rating, </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">y=</span>title, </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill=</span>title)) <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(<span class="at">scale =</span> <span class="dv">2</span>, </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">alpha=</span><span class="fl">0.7</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Distribution of Ratings for Movies </span><span class="sc">\n</span><span class="st">Directed by Paul Thomas Anderson"</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Rating"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Title"</span>) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Picking joint bandwidth of 0.606</code></pre>
 </div>
@@ -409,14 +410,15 @@ $ rating        &lt;int&gt; 5, 4, 3, 5, 4, 3, 5, 4, 3, 4, 5, 2, 3, 1, 5, 2, 4, 3
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>?geom_density_ridges</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>starting httpd help server ...</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#?geom_density_ridges</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code> done</code></pre>
-</div>
-</div>
+</section>
+<section id="findings-and-recommendations" class="level2">
+<h2 class="anchored" data-anchor-id="findings-and-recommendations">Findings and Recommendations</h2>
+<p>The initial survey mechanism for collecting data was unsuccessful, and an alternative method of synthetic data generation was employed. Rating data were generated for 7 mock respondents across 9 films using hard-coded values to retain reproducibility. An approach using quasi-random data generation was considered, but it was not pursued due to resource constraints.</p>
+<p>Additional findings include the mean rating and standard deviation of rating for each movie in the data set. The movie with the highest measured average rating was ‘Punch-Drunk Love’, with a mean of 4.5, while the movie with the lowest measured average rating was ‘The Master’, with a mean of 3.0. These high average ratings indicate a high overall affinity among mock respondents for these films.</p>
+<p>Lastly, certain procedural refinements were made along the way: storing credentials as environment variables, using a piped process to calculate mean ratings, and designing an effective database schema. Each of these practices can be integrated into a standard protocol for similar technical undertakings.</p>
+<p>While the movie release year was not an integral piece of information, one recommendation for future work could be to store this data in its own column, allowing for the arrangement of the movies in ascending or descending order by release year. Additionally, one future enhancement for data collection could be to create a connection between the database and the user inputs. This would remove the need for manual data input, which can lead to error. Lastly, standardizing the movie rating data by respondent before aggregating it by film could eliminate or account for certain respondent biases.</p>
 </section>
 
 </main>
