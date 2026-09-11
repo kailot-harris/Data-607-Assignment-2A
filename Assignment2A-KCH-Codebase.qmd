@@ -275,6 +275,48 @@ df_2 |>
                       df_2$movie_id==9), 
              na.rm = TRUE))
             
-# There's got to be an easier way to calculate these mean values
-# Need to investigate functions and loops
+# There must be an easier way to calculate these mean values
+
+df_2 |>
+  filter(rating > 0) |>
+  
+  group_by(movie_id) |>
+  
+  summarize (mean_rating = mean(rating, na.rm=TRUE),
+             SD_rating = stats::sd(rating, na.rm=TRUE))|>
+  
+  arrange(desc(mean_rating))
+
+
+```
+
+Now to plot the mean and standard deviation data in a ridge plot.
+
+```{r ridge-plot}
+
+library(ggridges)
+
+df_2 |>
+  filter(rating>0) |> #remove nulls
+  mutate(movie_id = fct_reorder(as.factor(movie_id), 
+                                rating, 
+                                .fun=mean, 
+                                na.rm=TRUE)) |>
+  
+  ggplot(aes(x=rating, 
+             y=title, 
+             fill=title)) +
+  geom_density_ridges(scale = 1.5, 
+                      alpha=0.7, show.legend = FALSE) +
+  labs(title="Distribution of Ratings for Movies Directed by\nPaul Thomas Anderson (ranked by mean rating)",
+       x = "Rating",
+       y = "Title") +
+  ylab(NULL)
+#Need a way to remove legend... theme?
+?legend
+?theme
+  
+?ggplot
+
+?geom_density_ridges
 ```
