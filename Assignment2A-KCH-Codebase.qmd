@@ -290,7 +290,7 @@ df_2 |>
 
 ```
 
-Now to plot the mean and standard deviation data in a ridge plot.
+The distribution of ratings data is plotted in a ridge plot. Certain difficulties were encountered in the process of generating the figure. First, the legend needed to be removed, as it created visual noise without assisting in distinguishing the plotted series. Removal of the legend was accomplished by setting the 'show.legend' boolean to false. Inspiration for this technique was found here: <https://ggplot2-book.org/maps.html#sec-polygonmaps>. Plotting the data as a ridgeline was inspired from a previous project and this resource: <https://wilkelab.org/ggridges/articles/introduction.html>.
 
 ```{r ridge-plot}
 
@@ -298,15 +298,10 @@ library(ggridges)
 
 df_2 |>
   filter(rating>0) |> #remove nulls
-  mutate(movie_id = fct_reorder(as.factor(movie_id), 
-                                rating, 
-                                .fun=mean, 
-                                na.rm=TRUE)) |>
-  
   ggplot(aes(x=rating, 
              y=title, 
              fill=title)) +
-  geom_density_ridges(scale = 1.5, 
+  geom_density_ridges(scale = 1, 
                       alpha=0.7, show.legend = FALSE) +
   labs(title="Distribution of Ratings for Movies Directed by\nPaul Thomas Anderson (ranked by mean rating)",
        x = "Rating",
@@ -317,6 +312,7 @@ df_2 |>
 ?theme
   
 ?ggplot
+
 
 ?geom_density_ridges
 ```
